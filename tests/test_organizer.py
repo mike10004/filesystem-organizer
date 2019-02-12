@@ -1,6 +1,5 @@
 import os
 import io
-import shutil
 import os.path
 import logging
 import unittest
@@ -45,8 +44,8 @@ class TestSubdivider(unittest.TestCase):
         try:
             with open(pathname, 'rb') as ifile:
                 actual = ifile.read()
-        except FileNotFoundError as e:
-            fnf = f"could not open {pathname} due to FileNotFoundError {e}"
+        except FileNotFoundError:
+            fnf = f"could not open {pathname} due to FileNotFoundError"
         if fnf:
             self.fail(fnf)
         self.assertEqual(bindata, actual, f"data from {pathname}")
@@ -78,10 +77,11 @@ class TestSubdivider(unittest.TestCase):
             os.makedirs(source_dir)
             contents = {}
             for fn in FILES:
-                data =fn.encode('utf-8')
+                data = fn.encode('utf-8')
                 _create_file(os.path.join(source_dir, fn), data)
                 contents[fn] = data
             subdivider = Subdivider()
+            subdivider.format_width = 2
             num_moved = subdivider.subdivide_max_files(source_dir, 3)
             self.assertFileContains(os.path.join(source_dir, "00", "a"), contents["a"])
             self.assertFileContains(os.path.join(source_dir, "00", "b"), contents["b"])
@@ -94,3 +94,12 @@ class TestSubdivider(unittest.TestCase):
             self.assertFileContains(os.path.join(source_dir, "02", "i"), contents["i"])
             self.assertFileContains(os.path.join(source_dir, "03", "j"), contents["j"])
         self.assertEqual(len(FILES), num_moved, "num_moved")
+
+
+class TestModuleMethods(unittest.TestCase):
+
+    def test_default_namer(self):
+        namer = organizer.default_namer(None, 202599 / 1024)
+        names = [namer.__next__() for _ in range(198)]
+        self.assertEqual('000', names[0])
+        self.assertEqual('197', names[-1])

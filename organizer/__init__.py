@@ -2,6 +2,7 @@
 
 import os
 import sys
+import math
 import os.path
 import shutil
 import logging
@@ -11,11 +12,15 @@ from typing import Iterator, Callable
 _log = logging.getLogger(__name__)
 
 
-def default_namer(expected_max: int=None) -> Iterator[str]:
-    if expected_max is None:
-        expected_max = 0
+def default_namer(fmt_width: int=None, expected_max: float=None) -> Iterator[str]:
+    if fmt_width is None:
+        if expected_max is None:
+            expected_max = 0
+        else:
+            expected_max = int(math.ceil(expected_max))
+        fmt_width = len(str(expected_max))
     n = 0
-    fmt = "{:0" + str(len(str(expected_max))) + "d}"
+    fmt = "{:0" + str(fmt_width) + "d}"
     while True:
         yield fmt.format(n)
         n += 1
@@ -23,6 +28,7 @@ def default_namer(expected_max: int=None) -> Iterator[str]:
 
 class Subdivider(object):
 
+    format_width: int = None
     filter: Callable = None
     callback: Callable = None
 
@@ -40,7 +46,7 @@ class Subdivider(object):
         _log.debug("directory has %d files", num_files)
         if not num_files:
             return 0
-        namer = default_namer(num_files)
+        namer = default_namer(self.format_width, expected_max=num_files/max_files_per_dir)
         subdir_num_files = 0
         num_moved = 0
         current_subdir_name = namer.__next__()

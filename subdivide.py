@@ -19,9 +19,11 @@ def main():
     parser.add_argument("--log-level", "-l", metavar="LEVEL", choices=('DEBUG', 'INFO', 'WARN', 'ERROR'), default='INFO', help="set log level")
     parser.add_argument("--progress", type=int, metavar="N", help="report progress at increments of N")
     parser.add_argument("--verbose", "-v", action='store_true', help="print messages about processing")
+    parser.add_argument("--format-width", type=int, help="set minimum length of subdirectory name")
     args = parser.parse_args()
     logging.basicConfig(level=logging.__dict__[args.log_level])
     subdivider = organizer.Subdivider()
+    subdivider.format_width = args.format_width
     if args.progress:
         subdivider.callback = organizer.ProgressMeter(args.progress)
     max_files = _DEFAULT_MAX_FILES
