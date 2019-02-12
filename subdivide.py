@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--destination", metavar="DIR", help="set destination; default is ROOT")
     parser.add_argument("--log-level", "-l", metavar="LEVEL", choices=('DEBUG', 'INFO', 'WARN', 'ERROR'), default='INFO', help="set log level")
     parser.add_argument("--progress", type=int, metavar="N", help="report progress at increments of N")
+    parser.add_argument("--verbose", "-v", action='store_true', help="print messages about processing")
     args = parser.parse_args()
     logging.basicConfig(level=logging.__dict__[args.log_level])
     subdivider = organizer.Subdivider()
@@ -28,7 +29,12 @@ def main():
         max_files = args.max_files
     if max_files <= 0:
         parser.error("max files must be positive integer")
-    subdivider.subdivide_max_files(args.directory, max_files)
+    num_moved = subdivider.subdivide_max_files(args.directory, max_files)
+    msg = f"{num_moved} file(s) moved"
+    if args.verbose or not num_moved:
+        _log.info(msg)
+    else:
+        _log.debug(msg)
     return 0
 
 
