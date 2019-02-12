@@ -4,7 +4,11 @@ import os.path
 import unittest
 import tempfile
 import organizer
+import tests
 from organizer import Subdivider
+
+
+tests.configure_logging()
 
 
 def _create_file(pathname, binary_data=None):
